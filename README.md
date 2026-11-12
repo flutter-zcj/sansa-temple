@@ -1,0 +1,163 @@
+# 山寺 · Sansa Temple 复刻工程
+
+对 https://sansatemple.com/ 的深度复刻实现：低多边形 3D 山寺、第三人称小和尚、合掌/跪拜/木鱼/念珠/点灯、多人同处一室。
+
+原站是韩国团队做的线上寺庙（"말없이 같이 앉아 있는 온라인 절"），用 Three.js + WebSocket 做成了一个可以静坐的 3D 小世界。本项目用 **uni-app（prjtmpl 模板）+ Three.js + FastAPI** 重建同款体验。
+
+---
+
+## 目录
+
+```
+sansa/
+├── docs/
+│   ├── 01-站点深度分析.html      拆解报告（技术指纹 / 交互矩阵 / 设计规范 / 方案）
+│   ├── 02-接口与协议.md          REST + WebSocket 协议说明
+│   ├── 03-复刻对照表.md          原站功能 → 本项目实现状态
+│   └── assets/                  实测截图
+├── prototype/                    独立可预览版（原生 ESM + Three.js，最快看效果）
+│   ├── index.html
+│   ├── vendor/three.module.js
+│   └── src/{main,world,actor,net}.js, ui.css
+├── web/                          uni-app 工程（基于 flutter-zcj/prjtmpl）
+│   └── src/pages/temple/         山寺页面
+│       ├── index.vue             UI（Vue 模板）
+│       ├── ui.scss               设计系统拷贝
+│       └── scene/
+│           ├── stage.js          舞台：渲染/相机/输入/音效/多人
+│           ├── world.js          程序化场景（山门/法堂/塔/钟/池/树/远山）
+│           ├── actor.js          小和尚与动作
+│           └── net.js            在场同步客户端
+└── server/                       FastAPI 后端
+    ├── app/{main,ws,store,config,incense}.py
+    │                            incense.py：上香队列（内存态，惰性结算）
+    ├── scripts/ws_check.py       WS 协议自检
+    └── requirements.txt
+
+deploy/sandbox/                   单端口网关（只用 Node 内置模块）
+├── server.js                     / → 落地页，/proto → 原型，/app → H5 产物
+│                                 /api → 反代 8000，/ws → Upgrade 透传
+├── serve.sh / start.sh / stop.sh
+└── README.md
+```
+
+---
+
+## 在线演示
+
+**https://ad6f44d5a0d7fc566.app.workbuddy.host/?sharecode=H7346IHWA5**
+
+三个入口：落地页（`/`）、免构建原型（`/proto/`）、uni-app 产物（`/app/`）。
+
+---
+
+## 快速开始
+
+### 1. 后端（FastAPI）
+
+```bash
+cd server
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+# 文档：http://localhost:8000/docs
+```
+
+自检（另开终端）：
+
+```bash
+python scripts/ws_check.py
+```
+
+### 2. 前端 · 独立预览版（推荐先看这个）
+
+```bash
+cd prototype
+python3 -m http.server 5180
+# 打开 http://localhost:5180/
+```
+
+多人：保证后端在 8000 端口，同一房间（`?room=02`）打开两个标签页即可看到彼此。
+单机模式：`?offline=1`。
+
+### 3. 前端 · uni-app 工程
+
+```bash
+cd web
+npm install --registry=https://registry.npmmirror.com
+npm run dev:h5          # 开发
+npm run build:h5        # 产物在 dist/build/h5
+```
+
+`src/pages.json` 已将 `pages/temple/index` 设为首页；`manifest.json` 的 H5 路径为 `/`。
+
+> 说明：本工程把 Three.js 放在 `src/static/three.module.js`，通过 `vite.config.ts` 的 `three` 别名引入，不额外安装 npm 包。
+
+### 4. 单端口部署
+
+对外只暴露 8080，后端 8000 绑定回环：
+
+```bash
+cd deploy/sandbox
+PORT=8080 bash serve.sh          # 前台
+bash start.sh                    # 后台，日志在 .serve.log
+bash stop.sh
+```
+
+网关用 Node 内置 `http` / `net` 实现，不装任何依赖：静态资源带 ETag 与 Range，`/api/*` 反代到 FastAPI，`/ws/*` 把 Upgrade 请求原样透传给 8000，因此**同源单端口也能跑 WebSocket**。
+
+> 关键点：前端 WS 地址必须用 `location.host` 而不是硬编码的 `localhost:8000`，否则过网关后必然连不上。
+
+---
+
+## 已实现
+
+| 模块 | 状态 | 说明 |
+|---|---|---|
+| 3D 场景 | ✅ | 山门、法堂（三尊像/供桌/暖光）、石塔、钟楼、莲池、竹林、枫林、落叶草丛、远山与树线、暮色天光与雾 |
+| 第三人称控制 | ✅ | 点击行走（射线拾取）、拖动环视、滚轮/双指缩放、镜头避障、碰撞与边界 |
+| 角色动作 | ✅ | 行走、待机呼吸、合掌、跪拜（三段动画）、敲击 |
+| 木鱼 | ✅ | 点击敲击、自动播放（620ms）、计数、合成音效、涟漪反馈 |
+| 念珠 | ✅ | 108 颗、滚动/滚轮推进、圈数与本轮统计、满圈钟声、本地存档 |
+| 观法 | ✅ | 加载仪式（四段文案）、膜色/玻璃态 UI、底部四键 dock、吐司提示 |
+| 地图传送 | ✅ | 手绘平面图 + 六个点位，点击走过去 |
+| 多人同步 | ✅ | WebSocket 房间（20 人上限）、加入/离开/位置/动作广播、他人插值与朝向平滑、断线重连 |
+| 后端接口 | ✅ | 房间列表、愿望灯（钩位唯一）、功德（拜数/圈数）、搬瓦进度、上香队列、供养信息 |
+| 入殿 | ✅ | 台基中间设台阶，人物拾级而上走进殿内（地面高度平滑抬升），两扇木门向内敞开可通行 |
+| 点灯写愿 | ✅ | 24 个灯钩（3 层 × 8），选钩位、选灯色、写 40 字以内愿望，灯体自发光 + Sprite 光晕，多人实时同步 |
+| 上香排队 | ✅ | 香炉前排队，队首燃香 20 秒后自动出队；服务端惰性结算，前端环形进度与提示文案 |
+| 搬瓦进度 | ✅ | 瓦堆 InstancedMesh 随全服进度累积，单次搬瓦 +1 片并广播到同房间 |
+| 换房 | ✅ | 房间面板列出各房在线数与上限，切换后重连对应房间 |
+| CAFE25 咖啡 | ⬜ | 原站有品牌联名，复刻版改为"一盏茶"，避免侵权 |
+| PWA | ⬜ | 可加 manifest + Service Worker |
+
+---
+
+## 与原站的差异（有意为之）
+
+1. **模型资产**：原站用自研 GLB（佛像、僧侣、猫）。本复刻全部程序化几何生成，零外部资产，便于替换与二次创作，也不涉及版权素材。
+2. **文案**：原站全韩文、敬语、极简。复刻版中文，保留同样的克制语气（短句、不说教、无 KPI）。
+3. **联名内容**：原站的 CAFE25 / 설강화 画作属于品牌合作，复刻版抽象为"茶寮"，不搬运商标与作品。
+4. **多人架构**：原站跑在 Cloudflare Workers；复刻版是 FastAPI 单进程内存态 + SQLite，20 人/房足够，扩展时把广播换成 Redis pub/sub。
+
+---
+
+## 验收要点
+
+- 打开页面 3 秒内进入场景，镜头在山门后，能看到参道尽头的法堂与殿内金身。
+- 点地面能走过去，拖动可以环视，滚轮能拉近拉远，走近莲池会被挡住。
+- 沿参道走到法堂前，从台基中间的台阶拾级而上，能直接走进殿内、站在供桌前；进出殿时人物高度随台阶平滑升降，镜头自动收近避免穿屋顶。
+- 点「木鱼」开面板，敲击有声音、计数增长；开自动后节奏稳定。
+- 点「念珠」，左右滑动或滚动会推进珠子，满 108 颗有一次钟声。
+- 点灯架上的空钩，选色写字，灯亮起且同房间其他人同步看到；点香炉可排队上香，队首燃 20 秒；点瓦堆搬一片瓦，进度条与瓦堆同步增长。
+- 左上角房号可打开房间面板，切换后进入另一间，其余人看不到你。
+- 两个标签页进同一房号，能看到对方走动、合掌、跪拜。
+
+---
+
+## 后续建议
+
+1. **绕塔**：石塔周围做绕塔路径，走满三圈记一次功德，塔身随圈数微亮。
+2. **茶寮**：原站的咖啡亭改为「一盏茶」，递茶给他人可得一句随喜。
+3. **音频**：把合成音换成真实采样（木鱼、钟、风、鸟），加 3D 声场（PannerNode）。
+4. **队列持久化**：上香队列当前在内存，重启即清空；多实例部署时换成 Redis List。
+5. **性能**：树与草改 InstancedMesh 分块；远景烘焙为贴图；移动端限制阴影。

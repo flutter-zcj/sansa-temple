@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>산사 sansatemple.com — 深度拆解与复刻方案</title>
+<style>
+  :root{
+    --paper:#f3efe5; --paper2:#eee9dc; --ink:#34382f; --muted:#858677;
+    --line:#d8d2c2; --accent:#8a6a3f; --moss:#3d4a3a; --night:#20251f;
+    --serif:"Songti SC","Noto Serif CJK SC","Source Han Serif SC",Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+       font-size:15px;line-height:1.85;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:64px 40px 96px}
+  header{border-bottom:1px solid var(--line);padding-bottom:36px;margin-bottom:44px}
+  .kicker{font-size:12px;letter-spacing:.28em;color:var(--muted);text-transform:uppercase}
+  h1{font-family:var(--serif);font-size:44px;line-height:1.25;font-weight:500;margin:14px 0 10px;letter-spacing:.02em}
+  .sub{color:var(--muted);font-size:14px}
+  .meta{display:flex;gap:26px;flex-wrap:wrap;margin-top:22px;font-size:12.5px;color:var(--muted)}
+  .meta b{color:var(--ink);font-weight:500}
+  h2{font-family:var(--serif);font-size:25px;font-weight:500;margin:56px 0 6px;letter-spacing:.02em}
+  h2 .no{font-size:12px;color:var(--accent);letter-spacing:.2em;display:block;margin-bottom:6px;font-family:var(--sans)}
+  h3{font-size:15px;font-weight:600;margin:28px 0 8px;letter-spacing:.02em}
+  p{margin:10px 0}
+  .lead{font-family:var(--serif);font-size:19px;line-height:1.9;color:#3a3f35;border-left:2px solid var(--accent);padding-left:20px;margin:26px 0}
+  .grid{display:grid;gap:18px}
+  .g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+  .card{background:#faf7ee;border:1px solid var(--line);padding:20px 22px}
+  .card h4{margin:0 0 6px;font-size:13px;letter-spacing:.12em;color:var(--accent);font-weight:600}
+  .card p{margin:0;font-size:13.5px;color:#4a4f45;line-height:1.75}
+  .num{font-family:var(--serif);font-size:30px;line-height:1.2;color:var(--ink)}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13.5px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-weight:600;font-size:12px;letter-spacing:.1em;color:var(--accent);border-bottom:1px solid #c9c2b0}
+  td code,code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;
+    background:#e9e3d3;padding:1px 5px;border-radius:3px;color:#4c4232}
+  figure{margin:26px 0}
+  figure img{width:100%;display:block;border:1px solid var(--line)}
+  figcaption{font-size:12.5px;color:var(--muted);margin-top:10px;line-height:1.7}
+  .swatches{display:flex;gap:0;margin:18px 0;border:1px solid var(--line)}
+  .sw{flex:1;height:104px;position:relative;display:flex;align-items:flex-end;padding:10px}
+  .sw span{font-size:10.5px;font-family:ui-monospace,monospace;background:#ffffffcc;padding:2px 5px;color:#333}
+  ul{margin:8px 0 8px 0;padding-left:20px}
+  li{margin:5px 0}
+  .tag{display:inline-block;font-size:11px;letter-spacing:.08em;padding:2px 8px;border:1px solid var(--line);
+       border-radius:999px;color:var(--muted);margin:0 6px 6px 0;background:#f8f4e9}
+  .note{background:var(--night);color:#e8e4d8;padding:20px 24px;font-size:13.5px;line-height:1.85;margin:22px 0}
+  .note b{color:#f2dca8;font-weight:500}
+  .flow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:18px 0;font-size:12.5px}
+  .flow i{font-style:normal;padding:7px 12px;border:1px solid var(--line);background:#faf7ee;color:#4a4f45}
+  .flow em{color:var(--accent);font-style:normal}
+  footer{margin-top:64px;padding-top:22px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+  @media(max-width:760px){.wrap{padding:36px 20px 64px}h1{font-size:32px}.g2,.g3,.g4{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kicker">Competitive Teardown · 2026.11.11</div>
+  <h1>산사 Sansa Temple<br>线上寺庙的 3D 复刻拆解</h1>
+  <div class="sub">目标站 https://sansatemple.com/ ｜ 前端基线 flutter-zcj/prjtmpl ｜ 后端 FastAPI</div>
+  <div class="meta">
+    <span>首页 HTML <b>5.2 KB</b></span>
+    <span>主逻辑包 <b>1.57 MB</b></span>
+    <span>样式 <b>115 KB</b></span>
+    <span>韩文文案 <b>462 条</b></span>
+    <span>场景点位 <b>10 处</b></span>
+    <span>实时通道 <b>WebSocket</b></span>
+  </div>
+</header>
+
+<p class="lead">这不是一个"寺庙介绍页"，而是一个用 Three.js 搭建的低多边形（low-poly）第三人称多人小世界：你以一个合掌小和尚的身份走进山门，可以合掌、跪拜、敲木鱼、拨念珠、上香、点灯写愿、绕塔、搬瓦修殿，也可以走进 CAFE25 给陌生人递一杯咖啡。整套体验没有一句 KPI 文案，全部通过动作与场景叙事完成。</p>
+
+<h2><span class="no">01 / FIRST LOOK</span>第一眼：它在卖什么</h2>
+
+<figure>
+  <img src="assets/scene-01.png" alt="산사 首屏实拍">
+  <figcaption>实测首屏（Chromium + WebGL 软件渲染）：暮色山门、青石参道、法堂内三尊金身、红叶枫树、跟着镜头的小和尚，以及底部四枚动作按钮。左上为服务器房号「산사 02」。</figcaption>
+</figure>
+
+<div class="grid g4" style="margin-top:26px">
+  <div class="card"><h4>定位</h4><p>「말없이 같이 앉아 있는 온라인 절」——不言不语、一起坐着的线上寺庙。核心不是祈福许愿，而是<b>陪伴式静坐</b>。</p></div>
+  <div class="card"><h4>形态</h4><p>PWA 单页 3D 场景，横竖屏自适应，手机优先（安全区、触摸手势、单指拖动环视）。</p></div>
+  <div class="card"><h4>商业模式</h4><p>极克制：供养米（Toss 账户 +  KakaoPay 二维码）、Buy Me a Coffee、以及 GS25 联名 CAFE25 的品牌场。</p></div>
+  <div class="card"><h4>情绪设计</h4><p>低模 + 秋色 + 暮光 + 连续环境音（风、鸟、木鱼、梵钟、心经）。没有任何倒计时与签到。</p></div>
+</div>
+
+<h2><span class="no">02 / TECH FINGERPRINT</span>技术指纹</h2>
+
+<table>
+  <tr><th style="width:22%">层</th><th style="width:34%">实测结果</th><th>判断依据</th></tr>
+  <tr><td>前端框架</td><td>Vite 构建的 SPA，无 React/Vue 运行时痕迹</td><td>入口 <code>assets/index-*.js</code> 仅 2.9 KB，动态 <code>import()</code> 主包；DOM 由原生 JS 拼装</td></tr>
+  <tr><td>3D 引擎</td><td>Three.js（WebGL2）</td><td>控制台报错栈 <code>THREE.WebGLRenderer</code>；GLB 模型 + PBR 材质三件套</td></tr>
+  <tr><td>实时多人</td><td>Cloudflare Workers + WebSocket</td><td><code>wss://sansatemple.com/presence?roomLimit=20&amp;garden=2</code>，单房间上限 20 人，多房号（02…）</td></tr>
+  <tr><td>资产</td><td>GLB 模型 7 个 + 材质贴图 8 组（color/normal/roughness）+ 音轨 2 条</td><td><code>buddha.glb</code>、<code>avalokitesvara.glb</code>、<code>mahastamaprapta.glb</code>、<code>monk.glb</code>、<code>gongyang-cat.glb</code>、<code>pine.glb</code>、<code>heart-sutra-v1.mp3</code></td></tr>
+  <tr><td>字体</td><td>自研可变字体 Sansa Quiet UI（45–930 字重，按 unicode-range 切片）</td><td><code>/fonts/SansaQuietUI-Core.woff2</code> + <code>Remainder.woff2</code></td></tr>
+  <tr><td>可观测</td><td>Cloudflare Insights + GA4</td><td><code>static.cloudflareinsights.com/beacon.min.js</code></td></tr>
+  <tr><td>PWA</td><td>manifest + standalone 显示 + 主题色 <code>#24251f</code></td><td><code>manifest.webmanifest</code>，含 192/512 图标</td></tr>
+</table>
+
+<h2><span class="no">03 / WORLD MAP</span>空间结构：十个点位的环形叙事</h2>
+
+<p>整张地图不是关卡，而是<b>一条从"入"到"静"再到"施"的动线</b>：从山门进入 → 沿参道穿过枫林 → 到法堂礼佛 → 转到后山搬瓦做务 → 再到江边与竹林散步 → 最后在 CAFE25 递出一杯咖啡。</p>
+
+<table>
+  <tr><th style="width:16%">点位</th><th style="width:18%">韩文</th><th>内容与可交互物</th></tr>
+  <tr><td>入口</td><td>입구</td><td>山门牌匾、青石参道、第一人称入场所见画面</td></tr>
+  <tr><td>法堂</td><td>청연당 (淸緣堂)</td><td>三尊像（释迦 / 观音 / 大势至）、香炉（排队上香）、福田箱、合掌与跪拜（25 拜）</td></tr>
+  <tr><td>莲池</td><td>연못 쉼터</td><td>莲花池、长椅（两人座）、点灯挂环（许愿 40 字）</td></tr>
+  <tr><td>钟楼</td><td>범종</td><td>梵钟 + 撞木，可敲响，声场扩散</td></tr>
+  <tr><td>石塔</td><td>탑돌이</td><td>三层石塔，绕塔经行（自动沿轨道行走）</td></tr>
+  <tr><td>竹林</td><td>대나무 숲</td><td>竹林小径、风声通道</td></tr>
+  <tr><td>江边</td><td>강변 산책로</td><td>东侧河流、水草、水波，散步道</td></tr>
+  <tr><td>柿饼架</td><td>곶감 덕장</td><td>晒柿饼的木架，秋收意象</td></tr>
+  <tr><td>工地</td><td>공사 현장</td><td>搬瓦修殿：戴安全帽 → 取瓦 → 放到工地 → 汇入全服进度</td></tr>
+  <tr><td>咖啡</td><td>CAFE25</td><td>手冲咖啡机、三种归属（无所有 / 全所有 / 赠送他人）、25 拜解锁、杯子丢弃与回收</td></tr>
+</table>
+
+<h2><span class="no">04 / INTERACTION MATRIX</span>交互矩阵：把"宗教动作"变成可玩动词</h2>
+
+<table>
+  <tr><th style="width:14%">动作</th><th style="width:18%">触发</th><th style="width:34%">机制</th><th>反馈</th></tr>
+  <tr><td>合掌</td><td>底部 dock「합장」</td><td>角色进入合掌姿态，3 秒呼吸循环</td><td>身体微倾 + 呼吸音 + 环境降噪</td></tr>
+  <tr><td>跪拜</td><td>底部 dock「절하기」</td><td>累计拜数，进度条 <code>bow-progress</code>；拜满 25 次解锁"全所有"咖啡</td><td>起身—跪下—叩首三段动画，木地板声</td></tr>
+  <tr><td>木鱼</td><td>dock「목탁」</td><td>独立面板：手动敲 / 自动播放（BPM 稳定），可调音量</td><td>每次敲击：音效 + 计数 + 涟漪光圈</td></tr>
+  <tr><td>念珠</td><td>dock「염주」</td><td>108 颗大珠，上下滑动/滚轮转动，记「第 N 圈 · 本轮 X 颗 · 共 Y 颗」</td><td>珠子高光流转、圈数提示、108 圈完成语</td></tr>
+  <tr><td>点灯</td><td>莲池灯架</td><td>选色（真红/栀子/青绿/米色/蓝）→ 写 40 字愿望 → 挂到空钩</td><td>灯笼亮起并漂浮，可回读他人的愿望</td></tr>
+  <tr><td>上香</td><td>法堂香炉</td><td>排队制（前方 N 人），轮到后走近、插香</td><td>"고요한 마음을 한 자루에 담아"，青烟粒子</td></tr>
+  <tr><td>搬瓦</td><td>工地</td><td>戴安全帽 → 取一片瓦 → 走到工地放下；跨房间汇总进度</td><td>全服进度条 + "已为 3 号服务器搬运 N 片"</td></tr>
+  <tr><td>咖啡</td><td>CAFE25 机器</td><td>选豆/杯型 → 25 拜进度 → 出杯 → 可自饮、可递给附近玩家、可丢弃</td><td>手冲动画 + 杯体贴图 + 分享图（可保存 PNG）</td></tr>
+  <tr><td>绕塔</td><td>石塔</td><td>一键沿预设路径环绕，可随时停</td><td>脚步节奏 + 视线随塔身抬升</td></tr>
+  <tr><td>地图</td><td>左上地图按钮</td><td>2D 手绘俯瞰图 + 10 个 POI 图钉，点击传送</td><td>淡入淡出 + 相机推轨</td></tr>
+</table>
+
+<div class="note">
+  <b>关键洞察：</b>它把"功德"设计成了<b>可累计但不可炫耀</b>的数值——拜数、圈数、瓦片数只对自己可见或汇入全服总量，从不排名。这是它和绝大多数 gamification 产品的分水岭，复刻时若加上排行榜，气质会立刻崩塌。
+</div>
+
+<h2><span class="no">05 / DESIGN SYSTEM</span>视觉规范：纸、墨、苔</h2>
+
+<div class="swatches">
+  <div class="sw" style="background:#f3efe5"><span>#f3efe5 paper</span></div>
+  <div class="sw" style="background:#34382f;color:#fff"><span>#34382f ink</span></div>
+  <div class="sw" style="background:#858677"><span>#858677 muted</span></div>
+  <div class="sw" style="background:#20251f"><span>#20251f night</span></div>
+  <div class="sw" style="background:#8a6a3f"><span>#8a6a3f bronze</span></div>
+  <div class="sw" style="background:#d9c9a3"><span>#d9c9a3 lantern</span></div>
+</div>
+
+<div class="grid g2">
+  <div class="card"><h4>色彩逻辑</h4><p>界面永远让位于场景：UI 用半透明玻璃（<code>#ffffff12</code> 起）与米纸色文字，只在夜景切到 <code>is-night</code> 深墨绿。金色只出现在佛身、灯火、进度三点。</p></div>
+  <div class="card"><h4>排版</h4><p>单一可变字体，字重 300–500 为主；标题字距 +0.2em~0.3em（韩文排版的呼吸感）；正文 13px / 行高 1.75，绝不加粗堆叠。</p></div>
+  <div class="card"><h4>形状</h4><p>胶囊（radius 999px）+ 圆形工具键（44px 触控下限）；对话框 20–24px 圆角，玻璃模糊 <code>backdrop-filter</code>。</p></div>
+  <div class="card"><h4>动效</h4><p>统一缓动 <code>cubic-bezier(.22,1,.36,1)</code>；入场 600–900ms，对话 <code>dialog-in</code> 上浮 8px；全部尊重 <code>prefers-reduced-motion</code>。</p></div>
+</div>
+
+<figure>
+  <img src="assets/boot.png" alt="加载页">
+  <figcaption>启动页：深墨绿底、细线进度条、"산사의 풍경을 불러오고 있어요." 五段式加载文案（准备法堂→准备咖啡与树→绘制入口→到达）。复刻时应逐字保留这种"仪式感加载"。</figcaption>
+</figure>
+
+<h2><span class="no">06 / SCENE ART</span>场景美术：低模不等于低质</h2>
+
+<ul>
+  <li><b>几何</b>：全部低面数硬边模型，屋顶用斜面块拼出反宇（檐口起翘），柱、梁、台基分层堆叠，靠<b>轮廓</b>而非细节辨认建筑。</li>
+  <li><b>材质</b>：8 组 PBR（木、石、瓦、灰泥、布、地、岩）复用，贴图为手绘颗粒感，roughness 偏高，几乎无金属反射——除了佛像与钟。</li>
+  <li><b>光照</b>：单一方向光 + 半球光 + 雾（<code>fog</code>），黄昏色温偏暖，远景山体用低饱和剪影叠层做空气透视。</li>
+  <li><b>植被</b>：枫树用 3–5 个球簇 + 透光叶片贴图；竹为细长圆柱群；地面用大面积色块 + 落叶贴片散布。</li>
+  <li><b>镜头</b>：第三人称跟随，距离约 4.5m、俯角 12°；拖动 orbit、滚轮 dolly，遇建筑自动收近（避免穿墙）。</li>
+</ul>
+
+<h2><span class="no">07 / CLONE ARCHITECTURE</span>复刻架构（prjtmpl + FastAPI）</h2>
+
+<div class="flow">
+  <i>uni-app H5 页面<br><em>pages/temple</em></i><em>→</em>
+  <i>Three.js 场景层<br><em>world / actor / camera</em></i><em>→</em>
+  <i>交互层<br><em>actions / ui</em></i><em>→</em>
+  <i>Presence WS<br><em>/ws/presence</em></i><em>→</em>
+  <i>FastAPI<br><em>rooms / wishes / merit</em></i>
+</div>
+
+<table>
+  <tr><th style="width:24%">模块</th><th style="width:38%">职责</th><th>关键实现</th></tr>
+  <tr><td><code>pages/temple/index.vue</code></td><td>页面壳、全屏 canvas、UI 层（Vue 模板）</td><td>uni-app 页面，<code>navigationStyle: custom</code>，<code>pageOrientation: landscape</code> 可切</td></tr>
+  <tr><td><code>scene/world.js</code></td><td>程序化生成山门、法堂、石塔、钟、树、池、地形</td><td>不依赖原站 GLB，用 BoxGeometry / ExtrudeGeometry 拼装，保证可运行、可替换</td></tr>
+  <tr><td><code>scene/actor.js</code></td><td>小和尚骨架（头/身/双臂/双腿）+ 行走、合掌、跪拜、敲击动作</td><td>IK 简化：关节按正弦曲线驱动，无需外部动画文件</td></tr>
+  <tr><td><code>scene/controls.js</code></td><td>点击寻路、拖拽环视、滚轮缩放、碰撞收镜</td><td>射线拾取地面 + 线性插值移动</td></tr>
+  <tr><td><code>net/presence.js</code></td><td>WS 连接、心跳、断线重连、他人插值与朝向平滑</td><td>协议：<code>{t:"join|move|act|chat", ...}</code>，20 人/房</td></tr>
+  <tr><td><code>ui/*.vue</code></td><td>顶部房号、动作 dock、木鱼、念珠、点灯、地图、设置、供养</td><td>玻璃态样式复刻原站 token</td></tr>
+  <tr><td><code>server/app</code></td><td>FastAPI：房间列表、WS presence、愿望灯、功德统计、供养信息</td><td>内存态 + SQLite 持久化；单进程即可跑</td></tr>
+</table>
+
+<h3>后端接口草案</h3>
+<table>
+  <tr><th style="width:30%">接口</th><th style="width:14%">方法</th><th>说明</th></tr>
+  <tr><td><code>/api/rooms</code></td><td>GET</td><td>返回各房号在线人数、容量（20）、状态</td></tr>
+  <tr><td><code>/ws/presence?room=2</code></td><td>WS</td><td>入房、位置广播（10Hz 节流）、动作广播、他人离开</td></tr>
+  <tr><td><code>/api/lanterns</code></td><td>GET / POST</td><td>拉取已挂灯笼（颜色、愿望、位置钩号）；挂灯（≤40 字）</td></tr>
+  <tr><td><code>/api/merit/bow</code></td><td>POST</td><td>上报拜数，返回累计与是否解锁咖啡</td></tr>
+  <tr><td><code>/api/merit/tiles</code></td><td>GET / POST</td><td>全服搬瓦进度</td></tr>
+  <tr><td><code>/api/support</code></td><td>GET</td><td>供养账户与二维码信息（配置化）</td></tr>
+</table>
+
+<h2><span class="no">08 / BUILD</span>复刻成果（已完成可运行）</h2>
+
+<p>按上述方案已落地三份可运行代码：<b>uni-app 工程</b>（prjtmpl + Three.js，已构建通过）、<b>独立预览版</b>（免构建，直接起静态服务）、<b>FastAPI 后端</b>（房间 / 在场 / 愿灯 / 功德，已通过协议自检）。</p>
+
+<figure>
+  <img src="assets/uni-01.png" alt="复刻版首屏">
+  <figcaption>复刻版实机：山门匾额「山寺」、参道尽头的法堂与殿内金身、秋色枫林、暮色天光；右上「听诵经」，底部四键。构图与原站首屏同一取景逻辑。</figcaption>
+</figure>
+
+<div class="grid g2">
+  <figure style="margin:0">
+    <img src="assets/uni-02.png" alt="木鱼面板">
+    <figcaption>木鱼：可敲、可自动、计数与涟漪反馈，音效为 WebAudio 合成（无外部音频）。</figcaption>
+  </figure>
+  <figure style="margin:0">
+    <img src="assets/proto-04.png" alt="多人同房">
+    <figcaption>多人同房：第二个标签页的小和尚出现在同一段参道上，位置经 WebSocket 广播、客户端插值。</figcaption>
+  </figure>
+</div>
+
+<table>
+  <tr><th style="width:22%">产物</th><th style="width:18%">技术</th><th>状态</th></tr>
+  <tr><td><code>web/</code></td><td>uni-app + Vue3 + Three.js</td><td><code>npm run build:h5</code> 通过，产物 <code>dist/build/h5</code></td></tr>
+  <tr><td><code>prototype/</code></td><td>原生 ESM + Three.js</td><td>无需构建，静态服务即可预览（含 <code>?room=02&amp;offline=1</code> 参数）</td></tr>
+  <tr><td><code>server/</code></td><td>FastAPI + SQLite</td><td>REST 7 组接口 + WS 在场；<code>scripts/ws_check.py</code> 全链路通过</td></tr>
+</table>
+
+<p style="margin-top:18px">与"原站照抄"刻意保持的距离：<b>不用原站的 GLB/贴图/音频/联名品牌</b>，全部程序化重建与合成音效，界面文案改为中文但保留原有克制语气。这样交付物可以商用，不会踩版权。</p>
+
+<h2><span class="no">09 / PLAN</span>分三期落地</h2>
+
+<div class="grid g3">
+  <div class="card"><h4>P1 · 世界与行走（已完成骨架）</h4><p>场景程序化建模、第三人称控制、行走/合掌/跪拜、四键 dock、加载仪式、移动端安全区。</p></div>
+  <div class="card"><h4>P2 · 五个动词</h4><p>木鱼（手动/自动）、念珠 108、点灯写愿、上香排队、搬瓦进度；本地存档 + 后端同步。</p></div>
+  <div class="card"><h4>P3 · 多人 + 商业化</h4><p>WS presence、他人角色插值、CAFE25 咖啡流程与分享图、供养二维码、PWA 离线。</p></div>
+</div>
+
+<h2><span class="no">10 / TRADE-OFFS</span>复刻取舍（需要你拍板）</h2>
+<table>
+  <tr><th style="width:26%">项</th><th style="width:37%">原站做法</th><th>建议</th></tr>
+  <tr><td>语言</td><td>全韩文，语气极简、敬语</td><td>做中文版（保留「山寺」品牌与韩文副标），文案风格照搬其克制</td></tr>
+  <tr><td>模型资产</td><td>自研 GLB（佛像、僧侣、猫）</td><td>先程序化几何替代，后续可无缝换 GLB；不建议直接盗用原站资产</td></tr>
+  <tr><td>联名内容</td><td>CAFE25 / 설강화 画作</td><td>抽象为"茶寮 + 一盏灯"，避免侵权；如需保留品牌需授权</td></tr>
+  <tr><td>多人规模</td><td>20 人/房，多房号</td><td>FastAPI 单进程 20 人/房够用；扩展用 Redis pub/sub</td></tr>
+  <tr><td>横竖屏</td><td>竖屏为主，横屏自适应</td><td>模板已有 landscape 游戏页，沿用；默认竖屏</td></tr>
+</table>
+
+<footer>
+  拆解方式：HTTP 抓包 + 静态包逆向（文案 462 条、资源 77 项）+ Chromium/Xvfb 软件渲染实拍。<br>
+  本文档为技术分析，场景与文案为原创复述，不包含原站受版权保护的模型、贴图与音频文件。
+</footer>
+
+</div>
+</body>
+</html>

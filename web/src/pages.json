@@ -1,0 +1,121 @@
+{
+  "easycom": {
+    "autoscan": true,
+    "custom": {
+      "^u--(.*)": "uview-plus/components/u-$1/u-$1.vue",
+      "^up-(.*)": "uview-plus/components/u-$1/u-$1.vue",
+      "^u-([^-].*)": "uview-plus/components/u-$1/u-$1.vue",
+      "^lg-([^-].*)": "zhpub_ap/login/components/lg-$1/lg-$1.vue",
+      "^ol-([^-].*)": "zhpub_com/src/zpub_map/components/ol-$1/ol-$1.vue",
+      "^cx2-([^-].*)": "zhpub_com/src/zpub_att/components/cx2-$1/cx2-$1.vue",
+      "^(?!z-paging-refresh|z-paging-load-more)z-paging(.*)": "z-paging/components/z-paging$1/z-paging$1.vue",
+      "^uni-(.*)": "@dcloudio/uni-ui/lib/uni-$1/uni-$1.vue"
+    }
+  },
+  "pages": [
+    {
+      "name": "temple",
+      "path": "pages/temple/index",
+      "style": {
+        "navigationBarTitleText": "山寺",
+        "navigationStyle": "custom",
+        "backgroundColor": "#20251f",
+        "backgroundColorContent": "#20251f",
+        "disableScroll": true
+      }
+    },
+    {
+      "name": "login",
+      "path": "pages/login/login",
+      "style": {
+        "navigationBarTitleText": "登录",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "name": "gameHall",
+      "path": "pages/game/hall",
+      "style": {
+        "navigationBarTitleText": "游戏大厅",
+        "navigationStyle": "custom",
+        "backgroundColor": "#93aed2",
+        "pageOrientation": "landscape"
+      }
+    },
+    {
+      "name": "gameDdz",
+      "path": "pages/game/ddz",
+      "style": {
+        "navigationBarTitleText": "斗地主",
+        "navigationStyle": "custom",
+        "backgroundColor": "#4a0f09",
+        "pageOrientation": "landscape"
+      }
+    },
+    {
+      "name": "reclist",
+      "path": "pages/reclist/Reclist",
+      "style": {
+        "navigationBarTitleText": "列表"
+      }
+    },
+    {
+      "name": "simpleAtt",
+      "path": "pages/attribute/SimpleAtt",
+      "style": {
+        "navigationBarTitleText": "属性表单"
+      }
+    },
+    {
+      "name": "multiAtt",
+      "path": "pages/attribute/MultiAtt",
+      "style": {
+        "navigationBarTitleText": "多值属性"
+      }
+    },
+    {
+      "name": "bpmApply",
+      "path": "pages/bpm/Apply",
+      "style": {
+        "navigationBarTitleText": "流程申请"
+      }
+    },
+    {
+      "name": "bpmMyTask",
+      "path": "pages/bpm/MyTask",
+      "style": {
+        "navigationBarTitleText": "我的待办"
+      }
+    },
+    {
+      "name": "bpmUserTask",
+      "path": "pages/bpm/UserTask",
+      "style": {
+        "navigationBarTitleText": "用户任务"
+      }
+    },
+    {
+      "name": "bpmProcHandle",
+      "path": "pages/bpm/ProcHandle",
+      "style": {
+        "navigationBarTitleText": "流程处理"
+      }
+    },
+    {
+      "name": "bpmMultiStart",
+      "path": "pages/bpm/MultiStart",
+      "style": {
+        "navigationBarTitleText": "批量发起"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "山寺",
+    "navigationBarBackgroundColor": "#1AA86C",
+    "backgroundColor": "#20251f",
+    "app-plus": {
+      "bounce": "none"
+    }
+  }
+}

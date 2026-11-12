@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>欢乐斗地主复刻 · 牌桌效果预览</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #4a0f09; overflow: hidden; }
+    #game { width: 100%; height: 100%; }
+  </style>
+  <script src="./game/phaser.min.js"></script>
+</head>
+<body>
+<div id="game"></div>
+<script type="module">
+  import createDdzScene from '../pages/game/ddz-game.js'
+
+  const SceneClass = createDdzScene(window.Phaser, {
+    onAction() {},
+    onChat() {},
+    onPanelOpen() {},
+    onSelect() {},
+    onReady(scene)
+    {
+      window.__scene = scene
+    }
+  })
+
+  new window.Phaser.Game({
+    type: window.Phaser.AUTO,
+    parent: 'game',
+    width: 1334,
+    height: 750,
+    backgroundColor: '#4a0f09',
+    scale: { mode: window.Phaser.Scale.FIT, autoCenter: window.Phaser.Scale.CENTER_BOTH },
+    scene: [SceneClass]
+  })
+
+  const rankPool = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+  const hand = []
+  for (let i = 0; i < 17; i += 1)
+  {
+    hand.push({ suit: i % 4, rank: rankPool[i % rankPool.length] })
+  }
+  hand.push({ suit: 0, rank: 16 })
+  hand.push({ suit: 2, rank: 17 })
+
+  window.__mockState = {
+    phase_code: 3,
+    base_score: 100,
+    multiplier: 2,
+    bomb: 0,
+    my_seat: 0,
+    your_turn: true,
+    my_coin: 207400000,
+    bottom: [{ suit: 3, rank: 14 }, { suit: 1, rank: 15 }, { suit: 2, rank: 13 }],
+    last_cards: [
+      { suit: 3, rank: 14 },
+      { suit: 2, rank: 14 },
+      { suit: 1, rank: 14 },
+      { suit: 0, rank: 14 }
+    ],
+    last_type: '炸弹',
+    players: [
+      { seat: 0, nickname: '孙莉熊', card_count: 17, is_landlord: true, coin: 207400000, score: 0 },
+      { seat: 1, nickname: '小满堂518', card_count: 12, is_landlord: false, coin: 1949000000, score: 0 },
+      { seat: 2, nickname: '超级无敌', card_count: 17, is_landlord: false, coin: 664500, score: 0, passed: true }
+    ],
+    my_cards: hand
+  }
+
+  window.__applyMock = () =>
+  {
+    if (window.__scene)
+    {
+      window.__scene.renderState(window.__mockState)
+      return true
+    }
+    return false
+  }
+</script>
+</body>
+</html>

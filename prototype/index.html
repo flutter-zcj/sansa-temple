@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#24251f">
+<title>山寺 · 静坐片刻</title>
+<link rel="stylesheet" href="./src/ui.css">
+<script type="importmap">
+{ "imports": { "three": "./vendor/three.module.js" } }
+</script>
+</head>
+<body>
+<div id="stage">
+  <canvas id="scene"></canvas>
+
+  <!-- ===== 顶部 ===== -->
+  <header class="hud-top">
+    <div class="pill-group">
+      <button class="icon-btn" id="btn-map" aria-label="地图">
+        <svg viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Z"/><path d="M9 4v14M15 6v14"/></svg>
+      </button>
+      <button class="pill room-pill" id="btn-room">
+        <span class="room-name">山寺 <b id="room-no">02</b></span>
+        <svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+    </div>
+    <div class="pill-group right">
+      <button class="icon-btn" id="btn-sound" aria-label="声音">
+        <svg viewBox="0 0 24 24" id="ico-sound"><path d="M4 9v6h4l5 4V5L8 9H4Z"/><path d="M17 9.5a4 4 0 0 1 0 5"/></svg>
+      </button>
+      <button class="pill chant-pill" id="btn-chant">
+        <span class="wave"><i></i><i></i><i></i></span>
+        <span>听诵经</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== 场景提示 ===== -->
+  <div class="hint" id="hint">点击地面行走 · 拖动环视 · 滚轮缩放</div>
+  <div class="toast" id="toast"></div>
+
+  <!-- ===== 底部动作 ===== -->
+  <nav class="dock" id="dock">
+    <button class="dock-btn" data-act="bow">
+      <svg viewBox="0 0 24 24"><path d="M12 3v4M8 9h8M9 9c0 3-1 5-3 7h12c-2-2-3-4-3-7"/><path d="M6 20h12"/></svg>
+      <span>合掌</span>
+    </button>
+    <button class="dock-btn" data-act="pray">
+      <svg viewBox="0 0 24 24"><path d="M12 4a2 2 0 0 1 2 2v3h-4V6a2 2 0 0 1 2-2Z"/><path d="M8 9h8l1 6H7l1-6Z"/><path d="M7 15h10v3H7z"/></svg>
+      <span>跪拜</span>
+    </button>
+    <button class="dock-btn" data-act="moktak">
+      <svg viewBox="0 0 24 24"><path d="M4 15a8 8 0 0 1 16 0c0 2-2 3-8 3s-8-1-8-3Z"/><path d="M4 15h16"/><path d="m14 5 4-2"/></svg>
+      <span>木鱼</span>
+    </button>
+    <button class="dock-btn" data-act="beads">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="5" r="1.4"/><circle cx="19" cy="12" r="1.4"/><circle cx="12" cy="19" r="1.4"/><circle cx="5" cy="12" r="1.4"/></svg>
+      <span>念珠</span>
+    </button>
+  </nav>
+
+  <!-- ===== 木鱼面板 ===== -->
+  <section class="sheet" id="sheet-moktak" hidden>
+    <div class="sheet-head">
+      <h3>木鱼</h3>
+      <button class="close" data-close="sheet-moktak">×</button>
+    </div>
+    <div class="moktak-stage">
+      <button class="moktak" id="moktak-hit" aria-label="敲击木鱼">
+        <span class="moktak-body"></span>
+        <span class="moktak-stick"></span>
+        <span class="moktak-ripple"></span>
+      </button>
+      <p class="moktak-count"><b id="moktak-num">0</b> 声</p>
+      <p class="sheet-note">轻敲，听它回你一声。开自动后，声音会自己走。</p>
+    </div>
+    <div class="sheet-foot">
+      <button class="ghost-btn" id="moktak-auto">自动</button>
+      <button class="ghost-btn" id="moktak-reset">归零</button>
+    </div>
+  </section>
+
+  <!-- ===== 念珠面板 ===== -->
+  <section class="sheet beads-sheet" id="sheet-beads" hidden>
+    <div class="sheet-head">
+      <h3>念珠</h3>
+      <button class="close" data-close="sheet-beads">×</button>
+    </div>
+    <p class="beads-count"><span id="beads-round">第 1 圈</span><span id="beads-detail">本轮 0 颗 · 共 0 颗</span></p>
+    <div class="beads-track" id="beads-track"><div class="beads-line" id="beads-line"></div></div>
+    <p class="sheet-note">上下轻扫，或滚轮转动。满 108 颗为一圈。</p>
+  </section>
+
+  <!-- ===== 地图 ===== -->
+  <section class="sheet map-sheet" id="sheet-map" hidden>
+    <div class="sheet-head">
+      <h3>山寺地图</h3>
+      <button class="close" data-close="sheet-map">×</button>
+    </div>
+    <div class="map-body">
+      <svg viewBox="0 0 320 220" class="map-svg">
+        <rect x="0" y="0" width="320" height="220" fill="#efeade"/>
+        <path d="M0 160 Q60 140 110 168 T220 150 T320 170 L320 220 L0 220Z" fill="#dfe3d2"/>
+        <path d="M150 220 L150 120" stroke="#cdc4ad" stroke-width="14" fill="none"/>
+        <rect x="120" y="62" width="70" height="44" fill="#e3d9bf" stroke="#b8ab8c"/>
+        <path d="M112 62 L155 40 L198 62Z" fill="#8c8778"/>
+        <circle cx="243" cy="128" r="20" fill="#d5e2dd" stroke="#a9bdb6"/>
+        <circle cx="62" cy="96" r="12" fill="#cfd9c4" stroke="#a4b096"/>
+        <rect x="236" y="44" width="22" height="22" fill="#d8ccb2" stroke="#b3a687"/>
+        <g class="map-pins">
+          <g data-go="gate" transform="translate(155,168)"><circle r="7"/><text y="-12">入口</text></g>
+          <g data-go="hall" transform="translate(155,84)"><circle r="7"/><text y="-12">法堂</text></g>
+          <g data-go="pagoda" transform="translate(96,120)"><circle r="7"/><text y="-12">石塔</text></g>
+          <g data-go="bell" transform="translate(214,104)"><circle r="7"/><text y="-12">梵钟</text></g>
+          <g data-go="pond" transform="translate(243,128)"><circle r="7"/><text y="-12">莲池</text></g>
+          <g data-go="bamboo" transform="translate(62,96)"><circle r="7"/><text y="-12">竹林</text></g>
+          <g data-go="lanterns" transform="translate(196,150)"><circle r="7"/><text y="-12">灯架</text></g>
+          <g data-go="incense" transform="translate(114,150)"><circle r="7"/><text y="-12">香炉</text></g>
+          <g data-go="tiles" transform="translate(198,114)"><circle r="7"/><text y="-12">瓦堆</text></g>
+        </g>
+      </svg>
+      <p class="sheet-note">点一个名字，走过去。</p>
+    </div>
+  </section>
+
+  <!-- ===== 点灯 ===== -->
+  <section class="sheet lantern-sheet" id="sheet-lantern" hidden>
+    <div class="sheet-head">
+      <h3>点一盏灯</h3>
+      <button class="close" data-close="sheet-lantern">×</button>
+    </div>
+    <p class="lantern-hook">第 <b id="lantern-hook">—</b> 号钩位</p>
+    <div class="lantern-colors" id="lantern-colors">
+      <button class="swatch is-on" data-color="jin" style="--c:#ffcf94"><i></i><span>祈愿</span></button>
+      <button class="swatch" data-color="zhu" style="--c:#f08a6a"><i></i><span>平安</span></button>
+      <button class="swatch" data-color="qing" style="--c:#8fc6c0"><i></i><span>追思</span></button>
+      <button class="swatch" data-color="bai" style="--c:#efe6d2"><i></i><span>无言</span></button>
+    </div>
+    <label class="field">
+      <textarea id="lantern-wish" maxlength="40" rows="2" placeholder="写一句想说的话，最多 40 字"></textarea>
+      <span class="counter"><b id="lantern-count">0</b>/40</span>
+    </label>
+    <div class="sheet-foot">
+      <button class="ghost-btn" data-close="sheet-lantern">再想想</button>
+      <button class="primary-btn" id="lantern-submit">挂上</button>
+    </div>
+  </section>
+
+  <!-- ===== 上香 ===== -->
+  <section class="sheet incense-sheet" id="sheet-incense" hidden>
+    <div class="sheet-head">
+      <h3>上香</h3>
+      <button class="close" data-close="sheet-incense">×</button>
+    </div>
+    <div class="incense-body">
+      <div class="incense-ring">
+        <svg viewBox="0 0 100 100" aria-hidden="true">
+          <circle class="ring-bg" cx="50" cy="50" r="42"/>
+          <circle class="ring-fg" id="incense-ring-fg" cx="50" cy="50" r="42"/>
+        </svg>
+        <span id="incense-remain">—</span>
+      </div>
+      <div class="incense-info">
+        <p class="incense-line" id="incense-line">香炉空着</p>
+        <p class="incense-sub" id="incense-sub">点一支，等它自己烧完。</p>
+      </div>
+    </div>
+    <div class="sheet-foot">
+      <button class="ghost-btn" id="incense-leave" hidden>离开</button>
+      <button class="primary-btn" id="incense-join">排队上香</button>
+    </div>
+    <p class="sheet-note">一人一支，烧完让给下一位。</p>
+  </section>
+
+  <!-- ===== 搬瓦 ===== -->
+  <section class="sheet tiles-sheet" id="sheet-tiles" hidden>
+    <div class="sheet-head">
+      <h3>搬瓦修殿</h3>
+      <button class="close" data-close="sheet-tiles">×</button>
+    </div>
+    <p class="tiles-num"><b id="tiles-total">0</b><span> / <i id="tiles-goal">1080</i> 片</span></p>
+    <p class="tiles-sub">本室已搬 <b id="tiles-own">0</b> 片 · 还差 <i id="tiles-left">1080</i> 片</p>
+    <div class="progress"><i id="tiles-bar"></i></div>
+    <div class="sheet-foot">
+      <button class="primary-btn" id="tiles-carry">搬一块</button>
+    </div>
+    <p class="sheet-note">一人一片，大殿总会修好的。</p>
+  </section>
+
+  <!-- ===== 换房 ===== -->
+  <section class="sheet rooms-sheet" id="sheet-rooms" hidden>
+    <div class="sheet-head">
+      <h3>换一间坐</h3>
+      <button class="close" data-close="sheet-rooms">×</button>
+    </div>
+    <div class="room-list" id="room-list"></div>
+    <p class="sheet-note">每间二十人。满了，就去隔壁。</p>
+  </section>
+
+  <!-- ===== 加载 ===== -->
+  <div class="boot" id="boot">
+    <div class="boot-mark">
+      <svg viewBox="0 0 24 24"><path d="M2 11c5-1 8-4 10-7 2 3 5 6 10 7M4 12h16M7 13v7m10-7v7M4 20h16M10 15h4v5"/></svg>
+    </div>
+    <h1>山寺</h1>
+    <p id="boot-msg">正在铺开山路。</p>
+    <div class="boot-bar"><i id="boot-bar"></i></div>
+    <p class="boot-note">片刻之后，可以沿着石路走进去。</p>
+  </div>
+</div>
+
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>

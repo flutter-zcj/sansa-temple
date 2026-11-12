@@ -1,0 +1,28 @@
+# 依赖与产物
+node_modules/
+dist/
+build/
+unpackage/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# 运行期数据
+server/data/*.db
+server/data/*.db-*
+*.log
+
+# 模板自带的地图/3D 示例资源，与山寺页面无关（体积 30M+）
+web/src/static/cesium/
+web/src/static/model/
+web/src/static/game/
+
+# 编辑器与系统
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
