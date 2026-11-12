@@ -103,7 +103,7 @@ const net = netOff ? null : new Presence({
 if (net) net.connect();
 
 /* ---------------- 相机控制 ---------------- */
-const cam = { yaw: 0, pitch: 0.19, dist: 10.8, targetYaw: 0, targetPitch: 0.19, targetDist: 10.8, inHall: false };
+const cam = { yaw: 0, pitch: 0.19, dist: 10.8, targetYaw: 0, targetPitch: 0.19, targetDist: 10.8, baseDist: 10.8, inHall: false };
 const camTarget = new THREE.Vector3(0, 1.15, 33);
 
 function updateCamera(dt) {
@@ -111,7 +111,7 @@ function updateCamera(dt) {
   const inHall = actor.position.z < -6.9 && Math.abs(actor.position.x) < 9.2;
   if (inHall !== cam.inHall) {
     cam.inHall = inHall;
-    cam.targetDist = inHall ? 6.0 : 10.8;
+    cam.targetDist = inHall ? 6.2 : cam.baseDist;
   }
 
   cam.yaw += (cam.targetYaw - cam.yaw) * Math.min(1, dt * 9);
@@ -120,9 +120,9 @@ function updateCamera(dt) {
 
   // 目标点跟随后方一点，避免角色总在正中
   const px = actor.position.x, pz = actor.position.z;
-  camTarget.x += (px - camTarget.x) * Math.min(1, dt * 6);
-  camTarget.z += (pz - camTarget.z) * Math.min(1, dt * 6);
-  camTarget.y = 1.15;
+  camTarget.x += (px - camTarget.x) * Math.min(1, dt * 9);
+  camTarget.z += (pz - camTarget.z) * Math.min(1, dt * 9);
+  camTarget.y += ((actor.position.y + 1.12) - camTarget.y) * Math.min(1, dt * 9);
 
   const cp = Math.cos(cam.pitch);
   const ox = Math.sin(cam.yaw) * cp * cam.dist;
@@ -155,8 +155,8 @@ function updateCamera(dt) {
 /* ---------------- 输入 ---------------- */
 const raycaster = new THREE.Raycaster();
 const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-// 法堂台基顶面（y = 0.95），用于正确拾取殿内地板
-const hallPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.98);
+// 法堂台基顶面（y = 0.65），用于正确拾取殿内地板
+const hallPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.655);
 let dragging = false, moved = 0, lastX = 0, lastY = 0, downT = 0;
 const pointers = new Map();
 let pinchStart = 0, pinchDist0 = 0;
@@ -213,6 +213,7 @@ canvas.addEventListener('pointercancel', (e) => { pointers.delete(e.pointerId); 
 canvas.addEventListener('wheel', (e) => {
   e.preventDefault();
   cam.targetDist = THREE.MathUtils.clamp(cam.targetDist + e.deltaY * 0.006, 3.2, 16);
+  if (!cam.inHall) cam.baseDist = cam.targetDist;
 }, { passive: false });
 
 /** 命中灯钩 / 香炉 / 瓦堆时返回其类型，用于区分"走过去"与"动手" */

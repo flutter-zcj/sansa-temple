@@ -153,7 +153,7 @@ export function mountStage(container, opt = {}) {
   actor.groundFn = world.groundHeight;
 
   const sound = new Sound();
-  const cam = { yaw: 0, pitch: 0.19, dist: 10.8, targetYaw: 0, targetPitch: 0.19, targetDist: 10.8, inHall: false };
+  const cam = { yaw: 0, pitch: 0.19, dist: 10.8, targetYaw: 0, targetPitch: 0.19, targetDist: 10.8, baseDist: 10.8, inHall: false };
   const camTarget = new THREE.Vector3(0, 1.15, 33);
 
   /* 尺寸 */
@@ -174,7 +174,7 @@ export function mountStage(container, opt = {}) {
     const inHall = actor.position.z < -6.9 && Math.abs(actor.position.x) < 9.2;
     if (inHall !== cam.inHall) {
       cam.inHall = inHall;
-      cam.targetDist = inHall ? 6.0 : 10.8;
+      cam.targetDist = inHall ? 6.2 : cam.baseDist;
     }
 
     cam.yaw += (cam.targetYaw - cam.yaw) * Math.min(1, dt * 9);
@@ -183,7 +183,7 @@ export function mountStage(container, opt = {}) {
 
     camTarget.x += (actor.position.x - camTarget.x) * Math.min(1, dt * 6);
     camTarget.z += (actor.position.z - camTarget.z) * Math.min(1, dt * 6);
-    camTarget.y = 1.15;
+    camTarget.y += ((actor.position.y + 1.12) - camTarget.y) * Math.min(1, dt * 9);
 
     const cp = Math.cos(cam.pitch);
     let x = camTarget.x + Math.sin(cam.yaw) * cp * cam.dist;
@@ -210,7 +210,7 @@ export function mountStage(container, opt = {}) {
   /* 输入：拖动环视 / 点击行走 / 双指与滚轮缩放 */
   const ray = new THREE.Raycaster();
   const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-  const hallPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.98);
+  const hallPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.655);
   let dragging = false, moved = 0, lastX = 0, lastY = 0, downT = 0;
   const pointers = new Map();
   let pinchStart = 0, pinchDist0 = 0;
@@ -262,6 +262,7 @@ export function mountStage(container, opt = {}) {
   function onWheel(e) {
     e.preventDefault();
     cam.targetDist = THREE.MathUtils.clamp(cam.targetDist + e.deltaY * 0.006, 3.2, 16);
+    if (!cam.inHall) cam.baseDist = cam.targetDist;
   }
   canvas.addEventListener('pointerdown', onDown);
   canvas.addEventListener('pointermove', onMove);
@@ -537,6 +538,11 @@ export function mountStage(container, opt = {}) {
     get lanterns() { return lanternState; },
     get incense() { return incenseState; },
     get tiles() { return tileState; },
+    // 调试用只读入口（?debug=1 时由页面暴露到 window.__temple.stage）
+    get actor() { return actor; },
+    get world() { return world; },
+    get camera() { return camera; },
+    get cam() { return cam; },
     pray(on) {
       if (on) { actor.stop(); actor.setAction('pray'); net && net.sendAct('pray'); }
       else { actor.setAction('idle'); }
@@ -559,7 +565,7 @@ export function mountStage(container, opt = {}) {
     bell() { sound.bell(); },
     click() { sound.click(); },
     ambience(on) { sound.ambience(on); },
-    zoom(delta) { cam.targetDist = THREE.MathUtils.clamp(cam.targetDist + delta, 3.2, 16); },
+    zoom(delta) { cam.targetDist = THREE.MathUtils.clamp(cam.targetDist + delta, 3.2, 16); if (!cam.inHall) cam.baseDist = cam.targetDist; },
     destroy() {
       running = false;
       clearInterval(incenseTimer);
