@@ -982,6 +982,9 @@ export function buildWorld(scene) {
       { minX: 5.1, maxX: 10.1, minZ: 19.5, maxZ: 21.3 },     // 灯架
       { minX: -8.5, maxX: -6.7, minZ: 19.1, maxZ: 20.9 },    // 香炉
       { minX: 9.8, maxX: 11.8, minZ: 5.9, maxZ: 6.9 },       // 瓦堆
+      // 山门两根立柱，避免从柱心穿过去
+      { minX: -4.05, maxX: -3.35, minZ: 25.65, maxZ: 26.35 },
+      { minX: 3.35, maxX: 4.05, minZ: 25.65, maxZ: 26.35 },
     ],
     // 镜头避障只认大体积水面，台基放行，否则进殿会被顶回门口
     camBlockers: [
