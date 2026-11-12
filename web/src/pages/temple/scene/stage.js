@@ -190,6 +190,10 @@ export function mountStage(container, opt = {}) {
     let z = camTarget.z + Math.cos(cam.yaw) * cp * cam.dist;
     let y = camTarget.y + Math.sin(cam.pitch) * cam.dist;
 
+    // 过肩视角：机身略偏右，角色偏在画面一侧，不挡住正前方
+    x += Math.cos(cam.yaw) * 0.62;
+    z -= Math.sin(cam.yaw) * 0.62;
+
     for (const c of world.camBlockers) {
       if (x > c.minX - 0.6 && x < c.maxX + 0.6 && z > c.minZ - 0.6 && z < c.maxZ + 0.6) {
         const d = Math.hypot(x - camTarget.x, z - camTarget.z) || 1;
@@ -206,7 +210,7 @@ export function mountStage(container, opt = {}) {
   /* 输入：拖动环视 / 点击行走 / 双指与滚轮缩放 */
   const ray = new THREE.Raycaster();
   const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-  const hallPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.95);
+  const hallPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.98);
   let dragging = false, moved = 0, lastX = 0, lastY = 0, downT = 0;
   const pointers = new Map();
   let pinchStart = 0, pinchDist0 = 0;

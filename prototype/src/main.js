@@ -133,6 +133,10 @@ function updateCamera(dt) {
   let z = camTarget.z + oz;
   let y = camTarget.y + oy;
 
+  // 过肩视角：机身略偏右，角色偏在画面一侧，不挡住正前方
+  x += Math.cos(cam.yaw) * 0.62;
+  z -= Math.sin(cam.yaw) * 0.62;
+
   // 简单镜头避障：只避大体积的水面，台基放行
   for (const c of world.camBlockers) {
     if (x > c.minX - 0.6 && x < c.maxX + 0.6 && z > c.minZ - 0.6 && z < c.maxZ + 0.6) {
@@ -152,7 +156,7 @@ function updateCamera(dt) {
 const raycaster = new THREE.Raycaster();
 const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 // 法堂台基顶面（y = 0.95），用于正确拾取殿内地板
-const hallPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.95);
+const hallPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.98);
 let dragging = false, moved = 0, lastX = 0, lastY = 0, downT = 0;
 const pointers = new Map();
 let pinchStart = 0, pinchDist0 = 0;

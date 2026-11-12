@@ -256,7 +256,7 @@ function makeHall(scene) {
   const baseY = 0.95;
   // 台基
   g.add(box(17.4, baseY, 12, mat(0xa5a292), 0, baseY / 2, 0));
-  g.add(box(18, 0.2, 12.6, mat(0x8f8c7d), 0, baseY + 0.02, 0));
+  g.add(box(18, 0.12, 12.6, mat(0x8f8c7d), 0, baseY - 0.03, 0));
   // 台阶
   for (let i = 0; i < 3; i++) {
     g.add(box(4.4 - i * 0.4, 0.32, 0.6, mat(0xa9a696), 0, 0.16 + i * 0.32, 6.9 - i * 0.55));
@@ -320,9 +320,9 @@ function makeHall(scene) {
   g.add(roof);
 
   // 三尊像
-  g.add(makeBuddha(0, baseY, -1.6, 1));
-  g.add(makeBuddha(-3.5, baseY, -1.0, 0.78));
-  g.add(makeBuddha(3.5, baseY, -1.0, 0.78));
+  g.add(makeBuddha(0, baseY, -1.9, 1.12));
+  g.add(makeBuddha(-3.9, baseY, -1.2, 0.88));
+  g.add(makeBuddha(3.9, baseY, -1.2, 0.88));
 
   // 供桌
   g.add(box(4.6, 0.16, 1.1, mat(0x5b3a26), 0, baseY + 1.15, 2.4));
@@ -341,36 +341,173 @@ function makeHall(scene) {
 
 function makeBuddha(x, y, z, s = 1) {
   const g = new THREE.Group();
-  const goldMat = mat(PAL.gold, { roughness: 0.4, metalness: 0.55, emissive: 0x6b4a12, emissiveIntensity: 0.45, flat: false });
-  const goldSoft = mat(0xc79b47, { roughness: 0.5, metalness: 0.4, emissive: 0x4a3208, emissiveIntensity: 0.4, flat: false });
-  // 莲座
-  g.add(cyl(1.05, 1.2, 0.32, 12, goldSoft, 0, 0.16, 0));
-  for (let i = 0; i < 8; i++) {
-    const a = (i / 8) * Math.PI * 2;
-    const petal = new THREE.Mesh(new THREE.SphereGeometry(0.34, 6, 4), goldSoft);
-    petal.scale.set(1, 0.55, 1.5);
-    petal.position.set(Math.cos(a) * 1.02, 0.3, Math.sin(a) * 1.02);
-    petal.rotation.y = -a;
-    g.add(petal);
+  const PHI = Math.PI * 2;
+
+  const gold = mat(PAL.gold, { roughness: 0.44, metalness: 0.46, emissive: 0x6b4a12, emissiveIntensity: 0.28 });
+  const goldDeep = mat(0xb8893a, { roughness: 0.52, metalness: 0.4, emissive: 0x492f08, emissiveIntensity: 0.24 });
+  const goldLight = mat(0xe3b968, { roughness: 0.36, metalness: 0.5, emissive: 0x7c5a18, emissiveIntensity: 0.28 });
+  const ink = mat(0x5a3f12, { roughness: 0.7, metalness: 0.2, emissive: 0x201403, emissiveIntensity: 0.1 });
+
+  /* ---- 莲座：覆莲 + 仰莲 + 座面 ---- */
+  g.add(cyl(1.28, 1.34, 0.16, 12, goldDeep, 0, 0.08, 0));
+  for (let i = 0; i < 12; i++) {
+    const a = (i / 12) * PHI;
+    const p = new THREE.Mesh(new THREE.SphereGeometry(0.2, 5, 4), goldDeep);
+    p.scale.set(0.95, 0.5, 1.15);
+    p.position.set(Math.cos(a) * 1.22, 0.2, Math.sin(a) * 1.22);
+    p.rotation.y = -a;
+    g.add(p);
   }
-  // 身
-  const body = new THREE.Mesh(new THREE.SphereGeometry(0.78, 12, 10), goldMat);
-  body.scale.set(1, 1.15, 0.78); body.position.y = 1.15;
-  g.add(body);
-  const lap = new THREE.Mesh(new THREE.SphereGeometry(0.95, 12, 8), goldMat);
-  lap.scale.set(1, 0.42, 0.8); lap.position.y = 0.62;
+  for (let i = 0; i < 12; i++) {
+    const a = (i / 12) * PHI + 0.26;
+    const p = new THREE.Mesh(new THREE.SphereGeometry(0.24, 5, 4), goldLight);
+    p.scale.set(0.6, 1.05, 1.35);
+    p.position.set(Math.cos(a) * 0.94, 0.36, Math.sin(a) * 0.94);
+    p.rotation.y = -a;
+    g.add(p);
+  }
+  g.add(cyl(0.88, 0.92, 0.14, 12, goldDeep, 0, 0.56, 0));
+
+  /* ---- 结跏趺坐：裙摆 + 双膝 + 交叉双腿 + 脚掌 ---- */
+  const lap = new THREE.Mesh(new THREE.SphereGeometry(0.88, 12, 8), gold);
+  lap.scale.set(1.2, 0.33, 0.94);
+  lap.position.y = 0.8;
   g.add(lap);
-  // 头
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.42, 14, 12), goldMat);
-  head.position.y = 2.06; g.add(head);
-  const bun = new THREE.Mesh(new THREE.SphereGeometry(0.16, 8, 6), goldMat);
-  bun.position.y = 2.44; g.add(bun);
-  // 背光
-  const halo = new THREE.Mesh(new THREE.TorusGeometry(0.85, 0.05, 8, 28), goldSoft);
-  halo.position.set(0, 1.95, -0.42);
+
+  for (const sx of [-1, 1]) {
+    const knee = new THREE.Mesh(new THREE.SphereGeometry(0.28, 8, 6), gold);
+    knee.scale.set(1.05, 0.78, 1.0);
+    knee.position.set(sx * 0.9, 0.8, 0.15);
+    g.add(knee);
+
+    // 交叉的大腿：从一侧膝绕到身前
+    const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.14, 1.36, 7), goldLight);
+    thigh.position.set(sx * 0.08, 0.86, 0.24);
+    thigh.rotation.set(Math.PI / 2 - 0.1, 0, 0);
+    thigh.rotation.z = sx * 0.6;
+    g.add(thigh);
+  }
+  const foot = new THREE.Mesh(new THREE.SphereGeometry(0.13, 7, 5), goldLight);
+  foot.scale.set(1.5, 0.62, 1.0);
+  foot.position.set(-0.3, 0.94, 0.4);
+  foot.rotation.y = 0.4;
+  g.add(foot);
+
+  /* ---- 上身：腰腹 + 胸肩 + 颈 ---- */
+  const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.44, 0.4, 0.86, 16), gold);
+  torso.position.y = 1.24;
+  g.add(torso);
+
+  const chest = new THREE.Mesh(new THREE.SphereGeometry(0.46, 16, 12), gold);
+  chest.scale.set(0.99, 0.58, 0.94);
+  chest.position.y = 1.54;
+  g.add(chest);
+
+  g.add(cyl(0.155, 0.185, 0.22, 8, goldDeep, 0, 1.84, 0));
+
+  // 袈裟：右肩斜披到左肋的一片弧形衣（贴着躯干，侧面不显突兀）
+  const cloth = mat(0xe3b968, { roughness: 0.38, metalness: 0.48, emissive: 0x7c5a18, emissiveIntensity: 0.24, side: THREE.DoubleSide });
+  const hem = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.485, 0.14, 16, 1, true, -1.45, 2.9), cloth);
+  hem.position.set(0, 1.13, 0);
+  hem.rotation.z = 0.08;
+  g.add(hem);
+  const collar = new THREE.Mesh(new THREE.CylinderGeometry(0.472, 0.468, 0.12, 16, 1, true, -1.1, 2.2), cloth);
+  collar.position.set(0, 1.64, 0);
+  collar.rotation.z = 0.34;
+  g.add(collar);
+
+  /* ---- 双臂 + 禅定印（两手叠放腹前） ---- */
+  for (const sx of [-1, 1]) {
+    // 肩头圆角，避免圆柱顶端露出方角
+    const shoulderCap = new THREE.Mesh(new THREE.SphereGeometry(0.135, 8, 6), gold);
+    shoulderCap.position.set(sx * 0.455, 1.63, 0.04);
+    g.add(shoulderCap);
+
+    const upper = new THREE.Mesh(new THREE.CylinderGeometry(0.115, 0.098, 0.5, 7), gold);
+    upper.position.set(sx * 0.47, 1.42, 0.06);
+    upper.rotation.z = sx * 0.16;
+    upper.rotation.x = -0.1;
+    g.add(upper);
+
+    const fore = new THREE.Mesh(new THREE.CylinderGeometry(0.095, 0.082, 0.5, 7), goldLight);
+    fore.position.set(sx * 0.3, 1.13, 0.3);
+    fore.rotation.z = sx * 1.22;
+    fore.rotation.x = -0.4;
+    g.add(fore);
+  }
+  const palmA = new THREE.Mesh(new THREE.SphereGeometry(0.16, 8, 6), goldLight);
+  palmA.scale.set(1.16, 0.27, 0.8);
+  palmA.position.set(0.03, 1.05, 0.4);
+  g.add(palmA);
+  const palmB = new THREE.Mesh(new THREE.SphereGeometry(0.15, 8, 6), goldLight);
+  palmB.scale.set(1.12, 0.25, 0.78);
+  palmB.position.set(-0.03, 1.13, 0.42);
+  g.add(palmB);
+
+  /* ---- 头：面 + 螺髻 + 肉髻 + 长耳 + 五官 ---- */
+  const H = 2.18;
+  const HR = 0.4;
+  const head = new THREE.Mesh(new THREE.SphereGeometry(HR, 14, 12), gold);
+  head.scale.set(1, 1.05, 0.98);
+  head.position.y = H;
+  g.add(head);
+
+  // 螺髻：三圈小球贴合头顶球面
+  const coilGeo = new THREE.SphereGeometry(0.062, 5, 4);
+  [[0.34, 12], [0.275, 10], [0.175, 7]].forEach(([r, n], ri) => {
+    const hy = Math.sqrt(Math.max(0, HR * HR - r * r)) * 1.03;
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * PHI + ri * 0.32;
+      const c = new THREE.Mesh(coilGeo, goldLight);
+      c.position.set(Math.cos(a) * r, H + hy + 0.015, Math.sin(a) * r * 0.96);
+      g.add(c);
+    }
+  });
+
+  // 肉髻
+  const bun = new THREE.Mesh(new THREE.SphereGeometry(0.155, 8, 6), gold);
+  bun.scale.set(1, 1.15, 1);
+  bun.position.y = H + 0.46;
+  g.add(bun);
+
+  // 长耳垂
+  for (const sx of [-1, 1]) {
+    const ear = new THREE.Mesh(new THREE.SphereGeometry(0.085, 6, 5), goldLight);
+    ear.scale.set(0.5, 2.1, 0.85);
+    ear.position.set(sx * 0.375, H - 0.11, 0.02);
+    g.add(ear);
+  }
+
+  // 眉 / 眼 / 鼻 / 嘴（用压扁的球，低模下比方块柔和）
+  for (const sx of [-1, 1]) {
+    const brow = new THREE.Mesh(new THREE.SphereGeometry(0.055, 6, 4), ink);
+    brow.scale.set(2.3, 0.42, 0.5);
+    brow.position.set(sx * 0.15, H + 0.13, 0.35);
+    brow.rotation.z = sx * -0.14;
+    g.add(brow);
+
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.062, 6, 4), ink);
+    eye.scale.set(1.7, 0.46, 0.44);
+    eye.position.set(sx * 0.15, H + 0.05, 0.355);
+    eye.rotation.z = sx * -0.1;
+    g.add(eye);
+  }
+  const nose = new THREE.Mesh(new THREE.SphereGeometry(0.062, 6, 5), goldLight);
+  nose.scale.set(0.78, 1.18, 0.85);
+  nose.position.set(0, H - 0.04, 0.36);
+  g.add(nose);
+  const mouth = new THREE.Mesh(new THREE.SphereGeometry(0.058, 6, 4), ink);
+  mouth.scale.set(1.75, 0.42, 0.42);
+  mouth.position.set(0, H - 0.175, 0.352);
+  g.add(mouth);
+
+  /* ---- 背光 ---- */
+  const halo = new THREE.Mesh(new THREE.TorusGeometry(0.68, 0.038, 7, 32), goldLight);
+  halo.position.set(0, H + 0.02, -0.3);
   g.add(halo);
-  const disc = new THREE.Mesh(new THREE.CircleGeometry(0.82, 28), new THREE.MeshBasicMaterial({ color: 0xffd88a, transparent: true, opacity: 0.16 }));
-  disc.position.set(0, 1.95, -0.44);
+  const disc = new THREE.Mesh(new THREE.CircleGeometry(0.66, 32),
+    new THREE.MeshBasicMaterial({ color: 0xffd88a, transparent: true, opacity: 0.13, depthWrite: false }));
+  disc.position.set(0, H + 0.02, -0.32);
   g.add(disc);
 
   g.position.set(x, y, z);
@@ -378,6 +515,7 @@ function makeBuddha(x, y, z, s = 1) {
   g.traverse((o) => { if (o.isMesh) { o.castShadow = true; } });
   return g;
 }
+
 
 /* ---------- 石塔 ---------- */
 function makePagoda(scene, x = -20, z = -2) {
@@ -961,10 +1099,11 @@ export function buildWorld(scene) {
       tiles: new THREE.Vector3(10.8, 0, 8.0),
     },
     // 地面高度：法堂台基靠台阶抬升，人可拾级入殿
+    // 0.98 = 台基压顶板顶面，与 makeHall 里的 baseY - 0.03 + 0.06 对应，差 1cm 就会陷脚
     groundHeight: (x, z) => {
       if (Math.abs(x) < 9.4 && z < -6.9 && z > -19.2) {
         const t = z > -8.5 ? (-6.9 - z) / 1.6 : 1;
-        return 0.95 * Math.min(1, Math.max(0, t));
+        return 0.98 * Math.min(1, Math.max(0, t));
       }
       return 0;
     },
